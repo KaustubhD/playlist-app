@@ -12,6 +12,7 @@ let serverData = {
           {
             name: 'Go Out', 
             duration: 123
+          }, {
             name: 'Always Here', 
             duration: 123
           }, {
@@ -112,15 +113,17 @@ class Filter extends Component{
 
 class Playlist extends Component{
   render(){
+    let playlists = this.props.playlists
     return(
       <div style={{...defTextColor, width: '20%', display: 'inline-block'}}>
         <img />
-        <h3>Playlist Name</h3>
+        <h3>{playlists.name}</h3>
         <ul>
-          <li>Song 1</li>
-          <li>Song 2</li>
-          <li>Song 3</li>
-          <li>Song 4</li>
+          {
+            playlists.songs.map(song => 
+              <li>{song.name}</li>
+            )
+          }
         </ul>
       </div>
     )
@@ -151,10 +154,10 @@ class App extends Component {
             <PlCounter playlists={this.state.serverData.user && this.state.serverData.user.playlists}/>
             <PlLength playlists={this.state.serverData.user && this.state.serverData.user.playlists}/>
             <Filter />
-            <Playlist />
-            <Playlist />
-            <Playlist />
-            <Playlist />
+            {
+              this.state.serverData.user.playlists.map(pl =>
+                <Playlist playlists={pl}/>
+              )}
           </div> : <h1>Loading....</h1>
           // Else, render the h1 with loading text
         }
