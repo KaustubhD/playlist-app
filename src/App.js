@@ -103,7 +103,7 @@ render(){
 class Filter extends Component{
   render(){
     return(
-      <div style={defTextColor}>
+      <div style={defTextColor} onChange={event => this.props.onTextChange(event.target.value)}>
         <img />
         <input type="text" />
       </div>
@@ -133,7 +133,10 @@ class Playlist extends Component{
 class App extends Component {
   constructor(){
     super();
-    this.state = {serverData: {}}
+    this.state = {
+      serverData: {},
+      filterString: ''
+    }
   }
   componentDidMount(){
     setTimeout(() =>{
@@ -141,7 +144,6 @@ class App extends Component {
         serverData
       })
     }, 1000)
-    
   }
   render() {
     return (
@@ -153,9 +155,11 @@ class App extends Component {
             <h1>{this.state.serverData.user.name}'s Playlists</h1>
             <PlCounter playlists={this.state.serverData.user && this.state.serverData.user.playlists}/>
             <PlLength playlists={this.state.serverData.user && this.state.serverData.user.playlists}/>
-            <Filter />
+            <Filter onTextChange={text => this.setState({filterString: text})}/>
             {
-              this.state.serverData.user.playlists.map(pl =>
+              this.state.serverData.user.playlists.filter(pl => 
+                pl.name.toLowerCase().includes(this.state.filterString.toLowerCase())
+              ).map(pl =>
                 <Playlist playlists={pl}/>
               )}
           </div> : <h1>Loading....</h1>
