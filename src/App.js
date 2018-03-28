@@ -1,8 +1,6 @@
 import React, { Component } from 'react';
-import logo from './logo.svg';
 import './App.css';
 
-// let defTextColor = '#fff'
 let defTextColor = {color: '#fff'}
 class Aggregate extends Component{
 
@@ -21,7 +19,6 @@ class Filter extends Component{
       <div style={defTextColor}>
         <img />
         <input type="text" />
-        Filter
       </div>
     )
   }
