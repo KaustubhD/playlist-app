@@ -144,7 +144,8 @@ class App extends Component {
   componentDidMount(){
     let parsedQString = queryString.parse(window.location.search)
     let access_token = parsedQString.access_token
-
+    if(!access_token)
+      return
     // console.log(access_token)
 
     fetch('https://api.spotify.com/v1/me', {
@@ -186,7 +187,7 @@ class App extends Component {
                 <Playlist playlists={pl}/>
               )
             }
-          </div> : <button onClick={() => window.location = 'http://localhost:8888/login'} style={{margin: '30px', 'fontSize': '2em', padding: '30px'}}>Click here to sign in</button>
+          </div> : <button onClick={() => window.location = window.location.href.includes('localhost') ? 'http://localhost:8888/login' : 'https://playlist-app-backend.herokuapp.com/login'} style={{margin: '30px', 'fontSize': '2em', padding: '30px'}}>Click here to sign in</button>
           // Else, render the h1 with loading text
         }
       </div>
