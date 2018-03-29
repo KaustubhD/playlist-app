@@ -1,74 +1,77 @@
 import React, { Component } from 'react';
 import './App.css';
+import logo from './logo.svg';
+import queryString from 'query-string';
 
 let defTextColor = {color: '#fff'}
-let serverData = {
-  user: {
-    name: 'Kay',
-    playlists: [
-      {
-        name: 'My Pl One',
-        songs: [
-          {
-            name: 'Go Out', 
-            duration: 123
-          }, {
-            name: 'Always Here', 
-            duration: 123
-          }, {
-            name: 'About Me',
-            duration: 123
-          }
-        ]
-      },
-      {
-        name: 'My Pl Two ',
-        songs: [
-          {
-            name: 'Mami',
-            duration: 112
-          }, {
-            name: 'Go About It',
-            duration: 112
-          }, {
-            name: 'Heard About You',
-            duration: 112
-          }
-        ]
-      },
-      {
-        name: 'My Pl Three',
-        songs: [
-          {
-            name: 'Worldwide',
-            duration: 93
-          }, {
-            name: 'Timber',
-            duration: 93
-          }, {
-            name: 'Hello',
-            duration: 93
-          }
-        ]
-      },
-      {
-        name: 'My Pl Four',
-        songs: [
-          {
-            name: 'I\'m here',
-            duration: 45
-          }, {
-            name: 'Where were you',
-            duration: 45
-          }, {
-            name: 'Animals',
-            duration: 45
-          }
-        ]
-      }
-    ]
-  }
-}
+// let serverData = {
+//   user: {
+//     name: 'Kay',
+//     playlists: [
+//       {
+//         name: 'My Pl One',
+//         songs: [
+//           {
+//             name: 'Go Out', 
+//             duration: 123
+//           }, {
+//             name: 'Always Here', 
+//             duration: 123
+//           }, {
+//             name: 'About Me',
+//             duration: 123
+//           }
+//         ]
+//       },
+//       {
+//         name: 'My Pl Two ',
+//         songs: [
+//           {
+//             name: 'Mami',
+//             duration: 112
+//           }, {
+//             name: 'Go About It',
+//             duration: 112
+//           }, {
+//             name: 'Heard About You',
+//             duration: 112
+//           }
+//         ]
+//       },
+//       {
+//         name: 'My Pl Three',
+//         songs: [
+//           {
+//             name: 'Worldwide',
+//             duration: 93
+//           }, {
+//             name: 'Timber',
+//             duration: 93
+//           }, {
+//             name: 'Hello',
+//             duration: 93
+//           }
+//         ]
+//       },
+//       {
+//         name: 'My Pl Four',
+//         songs: [
+//           {
+//             name: 'I\'m here',
+//             duration: 45
+//           }, {
+//             name: 'Where were you',
+//             duration: 45
+//           }, {
+//             name: 'Animals',
+//             duration: 45
+//           }
+//         ]
+//       }
+//     ]
+//   }
+// }
+
 class PlCounter extends Component{
 
     render(){
@@ -104,7 +107,7 @@ class Filter extends Component{
   render(){
     return(
       <div style={defTextColor} onChange={event => this.props.onTextChange(event.target.value)}>
-        <img />
+        <img alt="search"/>
         <input type="text" />
       </div>
     )
@@ -116,7 +119,7 @@ class Playlist extends Component{
     let playlists = this.props.playlists
     return(
       <div style={{...defTextColor, width: '20%', display: 'inline-block'}}>
-        <img />
+        <img src={playlists.imageURL} style={{width: '60px'}} alt="Playlist display"/>
         <h3>{playlists.name}</h3>
         <ul>
           {
@@ -139,30 +142,51 @@ class App extends Component {
     }
   }
   componentDidMount(){
-    setTimeout(() =>{
-      this.setState({
-        serverData
-      })
-    }, 1000)
+    let parsedQString = queryString.parse(window.location.search)
+    let access_token = parsedQString.access_token
+
+    // console.log(access_token)
+
+    fetch('https://api.spotify.com/v1/me', {
+      headers: {
+        'Authorization': 'Bearer ' + access_token
+      }
+    }).then((res) => res.json()).then(data => this.setState({user: data.display_name}))
+
+    fetch('https://api.spotify.com/v1/me/playlists', {
+      headers: {
+        'Authorization': 'Bearer ' + access_token
+      }
+    }).then((res) => res.json()).then(data => this.setState({playlists: data.items.map(item => {
+        // console.log(item)
+        return {name: item.name, songs: [], imageURL: item.images.length > 0 ? item.images[0].url : logo}
+      }
+    )}))
+    // setTimeout(() =>{
+    //   this.setState({
+    //     serverData
+    //   })
+    // }, 1000)
   }
   render() {
-    let playlistsFinal = this.state.serverData.user ? this.state.serverData.user.playlists.filter(pl => 
+    let playlistsFinal = this.state.user && this.state.playlists ? this.state.playlists.filter(pl => 
       pl.name.toLowerCase().includes(this.state.filterString.toLowerCase())) : []
     return (
       <div className="App">
         {
           // Render the div element only if the serverData.user exists
-          this.state.serverData.user ?
+          this.state.user ?
           <div>
-            <h1>{this.state.serverData.user.name}'s Playlists</h1>
+            <h1>{this.state.user}'s Playlists</h1>
             <PlCounter playlists={playlistsFinal}/>
             <PlLength playlists={playlistsFinal}/>
             <Filter onTextChange={text => this.setState({filterString: text})}/>
             {
               playlistsFinal.map(pl =>
                 <Playlist playlists={pl}/>
-              )}
-          </div> : <h1>Loading....</h1>
+              )
+            }
+          </div> : <button onClick={() => window.location = 'http://localhost:8888/login'} style={{margin: '30px', 'fontSize': '2em', padding: '30px'}}>Click here to sign in</button>
           // Else, render the h1 with loading text
         }
       </div>
