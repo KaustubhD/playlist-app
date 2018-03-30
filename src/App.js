@@ -192,8 +192,13 @@ class App extends Component {
     // }, 1000)
   }
   render() {
-    let playlistsFinal = this.state.user && this.state.playlists ? this.state.playlists.filter(pl => 
-      pl.name.toLowerCase().includes(this.state.filterString.toLowerCase())) : []
+    let playlistsFinal = this.state.user && this.state.playlists ? this.state.playlists.filter(pl => {
+      let PlMatch = pl.name.toLowerCase().includes(this.state.filterString.toLowerCase())
+      // let SongMatch = pl.songs.filter(song => song.name.toLowerCase().includes(this.state.filterString.toLowerCase()))
+      // return PlMatch || SongMatch.length > 0
+      let SongMatch = pl.songs.find(song => song.name.toLowerCase().includes(this.state.filterString.toLowerCase()))
+      return PlMatch || SongMatch
+    }) : []
     return (
       <div className="App">
         {
