@@ -1,6 +1,6 @@
-#Playlist App
+# Playlist App
 
-###This is a simple react app for viewing through your spotify playlists.
+### This is a simple react app for viewing through your spotify playlists.
 
 The link for the [deployed app](http://spot-playlist-app.herokuapp.com) on heroku
 
