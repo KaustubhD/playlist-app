@@ -3,7 +3,7 @@ import './App.css';
 import logo from './logo.svg';
 import queryString from 'query-string';
 
-let defTextColor = {color: '#fff'}
+let defText = {color: '#fff', fontFamily: 'Raleway', textAlign: 'center'}
 // let serverData = {
 //   user: {
 //     name: 'Kay',
@@ -76,7 +76,7 @@ class PlCounter extends Component{
 
     render(){
       return(
-        <div className="aggregate" style={{...defTextColor, width: '40%', display: 'inline-block'}}>
+        <div className="aggregate" style={{...defText, width: '50%', display: 'inline-block'}}>
           <h2>{this.props.playlists.length} Playlist(s)</h2>
         </div>
       )
@@ -92,10 +92,13 @@ render(){
   }, [])
   // console.log(songs)
   let totalHours = songs.reduce((acc, eachSong) => {
-    return acc += Math.round(eachSong.duration_ms / 1000)
+    return acc += Math.round(eachSong.duration_ms / 60000)
   }, 0)
+  let plLengthStyle = {
+    color: totalHours < 20 ? '#A23232' : '#fff'
+  }
   return(
-    <div className="aggregate" style={{...defTextColor, width: '40%', display: 'inline-block'}}>
+    <div className="aggregate" style={{...defText, ...plLengthStyle, width: '40%', display: 'inline-block'}}>
       <h2>{totalHours} Hour(s)</h2>
     </div>
   )
@@ -106,9 +109,8 @@ render(){
 class Filter extends Component{
   render(){
     return(
-      <div style={defTextColor} onChange={event => this.props.onTextChange(event.target.value)}>
-        <img alt="search"/>
-        <input type="text" />
+      <div style={{...defText, marginBottom: '20px'}} onChange={event => this.props.onTextChange(event.target.value)}>
+        <input type="text" style={{padding: '10px', borderRadius: '3px', 'border': 0, fontSize: '20px'}}/>
       </div>
     )
   }
@@ -118,13 +120,13 @@ class Playlist extends Component{
   render(){
     let playlists = this.props.playlists
     return(
-      <div style={{...defTextColor, width: '20%', display: 'inline-block'}}>
-        <img src={playlists.imageURL} style={{width: '60px'}} alt="Playlist display"/>
+      <div style={{...defText, 'width': '33.33%', 'backgroundColor': '#888', padding: '10px', margin: '2px', borderRadius: '4px'}}>
         <h3>{playlists.name}</h3>
-        <ul>
+        <img src={playlists.imageURL} style={{width: '60px'}} alt="Playlist display"/>
+        <ul style={{margin: '0', padding: '0', 'listStyleType': 'none'}}>
           {
             playlists.songs.map(song => 
-              <li>{song.name}</li>
+              <li style={{margin: '5px 0'}}>{song.name}</li>
             )
           }
         </ul>
@@ -170,7 +172,7 @@ class App extends Component {
         })
 
         let allPromisesResponse = Promise.all(promisesArray).then(playlistTracksArray => {
-          console.log(playlistTracksArray)
+          // console.log(playlistTracksArray)
           playlistTracksArray.forEach((tracksArray, index) => {
             data.items[index].songs = tracksArray.items.map(item => item.track)
           })
@@ -178,7 +180,7 @@ class App extends Component {
         })
         return allPromisesResponse
       }).then(data => this.setState({playlists: data.items.map(item => {
-        console.log(item.songs)
+        // console.log(item.songs)
           return {
             name: item.name, 
             songs: item.songs.slice(0, 3), 
@@ -205,16 +207,18 @@ class App extends Component {
           // Render the div element only if the serverData.user exists
           this.state.user ?
           <div>
-            <h1>{this.state.user}'s Playlists</h1>
+            <h1 style={defText}>{this.state.user}'s Playlists</h1>
             <PlCounter playlists={playlistsFinal}/>
             <PlLength playlists={playlistsFinal}/>
             <Filter onTextChange={text => this.setState({filterString: text})}/>
+            <div style={{display: 'flex', justifyContent: 'center'}}>
             {
               playlistsFinal.map(pl =>
                 <Playlist playlists={pl}/>
               )
             }
-          </div> : <button onClick={() => window.location = window.location.href.includes('localhost') ? 'http://localhost:8888/login' : 'https://playlist-app-backend.herokuapp.com/login'} style={{margin: '30px', 'fontSize': '2em', padding: '30px'}}>Click here to sign in</button>
+            </div>
+          </div> : <button className="signIn" onClick={() => window.location = window.location.href.includes('localhost') ? 'http://localhost:8888/login' : 'https://playlist-app-backend.herokuapp.com/login'} style={{margin: '30px auto', 'fontSize': '2em', padding: '30px'}}>Click here to sign in</button>
           // Else, render the h1 with loading text
         }
       </div>
