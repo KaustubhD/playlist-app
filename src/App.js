@@ -92,7 +92,7 @@ render(){
   }, [])
   // console.log(songs)
   let totalHours = songs.reduce((acc, eachSong) => {
-    return acc += eachSong.duration
+    return acc += Math.round(eachSong.duration_ms / 1000)
   }, 0)
   return(
     <div className="aggregate" style={{...defTextColor, width: '40%', display: 'inline-block'}}>
@@ -158,10 +158,32 @@ class App extends Component {
       headers: {
         'Authorization': 'Bearer ' + access_token
       }
-    }).then((res) => res.json()).then(data => this.setState({playlists: data.items.map(item => {
-        // console.log(item)
-        return {name: item.name, songs: [], imageURL: item.images.length > 0 ? item.images[0].url : logo}
-      }
+    }).then((res) => res.json())
+      .then(data => {
+        let promisesArray = data.items.map(Pl => {
+          let fetchArray = fetch(Pl.tracks.href, {
+          headers: { 'Authorization': 'Bearer ' + access_token}
+          })
+          let responseArray = fetchArray.then(res => res.json())
+
+          return responseArray
+        })
+
+        let allPromisesResponse = Promise.all(promisesArray).then(playlistTracksArray => {
+          console.log(playlistTracksArray)
+          playlistTracksArray.forEach((tracksArray, index) => {
+            data.items[index].songs = tracksArray.items.map(item => item.track)
+          })
+          return data
+        })
+        return allPromisesResponse
+      }).then(data => this.setState({playlists: data.items.map(item => {
+        console.log(item.songs)
+          return {
+            name: item.name, 
+            songs: item.songs.slice(0, 3), 
+            imageURL: item.images.length > 0 ? item.images[0].url : logo}
+        }
     )}))
     // setTimeout(() =>{
     //   this.setState({
